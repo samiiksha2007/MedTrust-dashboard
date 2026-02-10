@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Stethoscope, ArrowRight } from 'lucide-react';
+import { Stethoscope, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -19,7 +19,14 @@ const Login = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
             <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border border-gray-100">
-                <div className="flex flex-col items-center mb-8">
+                <div className="flex flex-col items-center mb-8 relative">
+                    <a
+                        href="https://samiiksha2007.github.io/MedTrust/"
+                        className="absolute left-0 top-0 text-gray-400 hover:text-gray-600 transition-colors"
+                        title="Back to Blog"
+                    >
+                        <ArrowLeft className="w-6 h-6" />
+                    </a>
                     <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
                         <Stethoscope className="w-8 h-8" />
                     </div>

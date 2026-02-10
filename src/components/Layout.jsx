@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Heart, Activity, Brain, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Heart, Activity, Brain, User, LogOut, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const SidebarLink = ({ to, icon: Icon, label }) => {
@@ -40,6 +40,13 @@ const Layout = () => {
                 </nav>
 
                 <div className="p-4 border-t border-gray-100">
+                    <a
+                        href="https://samiiksha2007.github.io/MedTrust/"
+                        className="flex items-center gap-3 px-4 py-3 mb-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                        <span>Back to Blog</span>
+                    </a>
                     <div className="flex items-center gap-3 px-4 py-3 mb-2">
                         <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
                             {user?.username?.charAt(0).toUpperCase()}
