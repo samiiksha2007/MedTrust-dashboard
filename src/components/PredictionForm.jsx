@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { db } from '../firebaseConfig';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { getResultStatus } from '../utils/predictionUtils';
 
 const PredictionForm = ({ title, fields, onSubmit, endpoint }) => {
     const [formData, setFormData] = useState({});
@@ -17,17 +20,76 @@ const PredictionForm = ({ title, fields, onSubmit, endpoint }) => {
         setLoading(true);
         setResult(null);
 
-        // Simulate API Call delay
-        setTimeout(() => {
-            // Mock Result logic
-            const mockResult = Math.random() > 0.5 ? "High Risk Detected" : "Normal Health Status";
-            setResult({
-                prediction: mockResult,
-                hash: "0x7f83...2a9c" // Mock Blockchain Hash
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
             });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.detail || `Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("API Response:", data); // Debugging
+
+            // Handle various response formats
+            const predictionResult = data.predicted_class || data.prediction || data.result || data.output || "Unknown";
+
+            // Format accuracy string
+            let accuracyDisplay = "N/A";
+            const rawScore = data.confidence_score || data.confidence || data.accuracy || data.probability;
+
+            if (rawScore !== undefined) {
+                const score = Number(rawScore);
+                accuracyDisplay = score <= 1 ? (score * 100).toFixed(2) + "%" : score.toFixed(2) + "%";
+            }
+
+            // Generate mock hash
+            const mockHash = "0x" + Math.random().toString(16).substr(2, 40);
+
+
+
+            // Sanitize input data ONLY (exclude timestamp which is a special object)
+            const safeInputData = JSON.parse(JSON.stringify(formData));
+
+            const predictionData = {
+                userEmail: user?.email || "anonymous",
+                predictionType: title,
+                result: String(predictionResult),
+                accuracy: accuracyDisplay,
+                inputData: safeInputData,
+                blockchainHash: mockHash,
+                timestamp: serverTimestamp() // Add timestamp AFTER sanitization
+            };
+
+            // Save to Firestore
+            await addDoc(collection(db, "predictions"), predictionData);
+            console.log("Prediction saved to Firestore!", predictionData);
+
+            setResult({
+                prediction: String(predictionResult),
+                accuracy: accuracyDisplay,
+                hash: mockHash
+            });
+
+        } catch (error) {
+            console.error("Prediction Error: ", error);
+            alert("Failed to get prediction: " + error.message);
+        } finally {
             setLoading(false);
-        }, 2000);
+        }
     };
+
+    // Helper for display
+    const getResultUI = () => {
+        if (!result) return null;
+        return getResultStatus(result.prediction);
+    };
+
+    const statusUI = getResultUI();
 
     return (
         <div className="max-w-3xl mx-auto">
@@ -84,13 +146,22 @@ const PredictionForm = ({ title, fields, onSubmit, endpoint }) => {
                     </form>
                 ) : (
                     <div className="text-center py-8">
-                        <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 ${result.prediction.includes("High Risk") ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}>
-                            {result.prediction.includes("High Risk") ? <AlertTriangle className="w-10 h-10" /> : <CheckCircle2 className="w-10 h-10" />}
+                        <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 ${statusUI?.color || "bg-gray-100"}`}>
+                            {statusUI?.icon ? <statusUI.icon className="w-10 h-10" /> : <CheckCircle2 className="w-10 h-10" />}
                         </div>
                         <h3 className="text-2xl font-bold text-gray-800 mb-2">Analysis Complete</h3>
-                        <p className={`text-xl font-bold mb-6 ${result.prediction.includes("High Risk") ? "text-red-600" : "text-green-600"}`}>
-                            result: {result.prediction}
+
+                        {/* Display User Friendly Text */}
+                        <p className={`text-xl font-bold mb-2 ${statusUI?.textColor || "text-gray-800"}`}>
+                            {statusUI?.text}
                         </p>
+
+                        <p className="text-gray-600 font-medium mb-6">
+                            Model Accuracy: {result.accuracy}
+                        </p>
+
+                        {/* Debugging: Show raw result in small text if needed */}
+                        <p className="text-xs text-gray-400 mb-6">raw: {result.prediction}</p>
 
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 inline-block text-left">
                             <p className="text-sm text-gray-500 mb-1">Blockchain Verification Hash:</p>

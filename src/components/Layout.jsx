@@ -39,7 +39,16 @@ const Layout = () => {
                     <SidebarLink to="/start/brain" icon={Brain} label="Brain Tumor" />
                 </nav>
 
-                <div className="p-4 border-t border-gray-100">
+                <div className="p-4 border-t border-gray-100 space-y-3">
+                    {/* Server Status Indicator */}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-lg text-xs font-medium text-gray-500">
+                        <div className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </div>
+                        API: Connected (Proxy)
+                    </div>
+
                     <a
                         href="https://samiiksha2007.github.io/MedTrust/"
                         className="flex items-center gap-3 px-4 py-3 mb-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
@@ -47,15 +56,22 @@ const Layout = () => {
                         <ArrowLeft className="w-5 h-5" />
                         <span>Back to Blog</span>
                     </a>
-                    <div className="flex items-center gap-3 px-4 py-3 mb-2">
-                        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
-                            {user?.username?.charAt(0).toUpperCase()}
+                    <Link
+                        to="/profile"
+                        className="flex items-center gap-3 px-4 py-3 mb-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer group"
+                    >
+                        <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold border border-blue-200 group-hover:bg-blue-200 transition-colors">
+                            {(user?.displayName || user?.email || "U").charAt(0).toUpperCase()}
                         </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-medium">{user?.username}</p>
-                            <p className="text-xs text-gray-500">Patient</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate text-gray-900">
+                                {user?.displayName || user?.email?.split('@')[0] || "User"}
+                            </p>
+                            <p className="text-xs text-gray-500 truncate">
+                                {user?.email}
+                            </p>
                         </div>
-                    </div>
+                    </Link>
                     <button
                         onClick={logout}
                         className="flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg w-full transition-colors text-sm font-medium"

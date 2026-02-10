@@ -1,14 +1,23 @@
 import React from 'react';
+import { db } from '../firebaseConfig';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../apiConfig';
 import { Loader2, Upload, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { getResultStatus } from '../utils/predictionUtils';
 
 const BrainTumor = () => {
+    const { user } = useAuth();
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [image, setImage] = useState(null);
 
+    const [selectedFile, setSelectedFile] = useState(null);
+
     const handleImageChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             setImage(URL.createObjectURL(e.target.files[0]));
+            setSelectedFile(e.target.files[0]);
         }
     };
 
@@ -17,16 +26,84 @@ const BrainTumor = () => {
         if (!image) return;
 
         setLoading(true);
-        // Simulate API Call
-        setTimeout(() => {
-            setResult({
-                prediction: "No Tumor Detected",
-                confidence: "98.2%",
-                hash: "0x3a2...9b1"
+        setResult(null);
+
+        try {
+            // Convert blob URL to File object if needed, but here we just need the file input
+            // Ideally we should have stored the file object in state. 
+            // Let's assume the user re-selects or we can't easily get the file from valid blob url without fetch.
+            // BETTER APPROACH: Update handleImageChange to store the file object.
+
+            // For now, let's fix handleImageChange to store file, see next edit.
+            if (!selectedFile) {
+                alert("Please select an image first");
+                setLoading(false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            const response = await fetch(`${API_BASE_URL}/predict/brain_tumor`, {
+                method: 'POST',
+                body: formData
             });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("Brain Tumor API Response:", data);
+
+            // Handle various response formats
+            const predictionResult = data.predicted_class || data.prediction || data.result || "Unknown";
+
+            const rawScore = data.confidence_score || data.confidence || data.accuracy || data.probability;
+            let accuracyDisplay = "N/A";
+            if (rawScore !== undefined) {
+                accuracyDisplay = Number(rawScore).toFixed(2) + "%";
+            }
+
+            const mockHash = "0x" + Math.random().toString(16).substr(2, 40);
+
+
+            try {
+                // Sanitize input only
+                const safeInputData = JSON.parse(JSON.stringify({ filename: selectedFile.name }));
+
+                const predictionData = {
+                    userEmail: user?.email || "anonymous",
+                    predictionType: "Brain Tumor Detection",
+                    result: String(predictionResult),
+                    accuracy: accuracyDisplay,
+                    inputData: safeInputData,
+                    blockchainHash: mockHash,
+                    timestamp: serverTimestamp() // Add AFTER sanitization
+                };
+
+                // Save to Firestore
+                await addDoc(collection(db, "predictions"), predictionData);
+                console.log("Prediction saved to Firestore!", predictionData);
+            } catch (error) {
+                console.error("Error adding document: ", error);
+            }
+
+            setResult({
+                prediction: String(predictionResult),
+                confidence: accuracyDisplay,
+                hash: mockHash
+            });
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Prediction failed: " + error.message);
+        } finally {
             setLoading(false);
-        }, 2500);
+        }
     };
+
+    const statusUI = result ? getResultStatus(result.prediction) : null;
 
     return (
         <div className="max-w-3xl mx-auto">
@@ -66,11 +143,13 @@ const BrainTumor = () => {
                     </form>
                 ) : (
                     <div className="text-center py-8">
-                        <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 bg-green-100 text-green-600`}>
-                            <CheckCircle2 className="w-10 h-10" />
+                        <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 ${statusUI?.color || "bg-gray-100"}`}>
+                            {statusUI?.icon ? <statusUI.icon className="w-10 h-10" /> : <CheckCircle2 className="w-10 h-10" />}
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-800 mb-2">{result.prediction}</h3>
+                        <h3 className="text-2xl font-bold text-gray-800 mb-2">{statusUI?.text}</h3>
                         <p className="text-gray-500 mb-6">Confidence: {result.confidence}</p>
+
+                        <p className="text-xs text-gray-400 mb-6">raw: {result.prediction}</p>
 
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 inline-block text-left">
                             <p className="text-sm text-gray-500 mb-1">Blockchain Verification Hash:</p>

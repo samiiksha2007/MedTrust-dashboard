@@ -4,16 +4,26 @@ import { useAuth } from '../context/AuthContext';
 import { Stethoscope, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useAuth();
+    const [isLogin, setIsLogin] = useState(true);
+    const { login, signup } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (username.trim() && password.trim()) {
-            login(username, password);
-            navigate('/dashboard');
+        if (email.trim() && password.trim()) {
+            try {
+                if (isLogin) {
+                    await login(email, password);
+                } else {
+                    await signup(email, password);
+                }
+                navigate('/dashboard');
+            } catch (error) {
+                console.error("Auth failed", error);
+                alert((isLogin ? "Login Failed: " : "Signup Failed: ") + error.message);
+            }
         }
     };
 
@@ -33,22 +43,22 @@ const Login = () => {
                     </div>
                     <h1 className="text-2xl font-bold text-gray-800">Welcome to MedTrust</h1>
                     <p className="text-gray-500 text-center mt-2">
-                        Secure AI-Powered Healthcare Prediction System
+                        {isLogin ? "Secure AI-Powered Healthcare Prediction System" : "Create your account to get started"}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                            Patient ID / Username
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
                         </label>
                         <input
-                            type="text"
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Enter your username"
+                            placeholder="Enter your email"
                             required
                         />
                     </div>
@@ -72,9 +82,18 @@ const Login = () => {
                         type="submit"
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
                     >
-                        Access Dashboard <ArrowRight className="w-5 h-5" />
+                        {isLogin ? "Access Dashboard" : "Create Account"} <ArrowRight className="w-5 h-5" />
                     </button>
                 </form>
+
+                <div className="text-center mt-6">
+                    <button
+                        onClick={() => setIsLogin(!isLogin)}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors"
+                    >
+                        {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Login"}
+                    </button>
+                </div>
 
                 <p className="text-xs text-center text-gray-400 mt-8">
                     Academic Project. For educational purposes only.

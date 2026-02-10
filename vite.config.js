@@ -7,7 +7,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
+      '/predict': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/health': {
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,

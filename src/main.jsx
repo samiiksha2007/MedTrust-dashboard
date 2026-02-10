@@ -10,6 +10,7 @@ import HeartDisease from './pages/HeartDisease';
 import Diabetes from './pages/Diabetes';
 import GeneralHealth from './pages/GeneralHealth';
 import BrainTumor from './pages/BrainTumor';
+import Profile from './pages/Profile';
 import './index.css';
 
 const App = () => {
@@ -22,6 +23,7 @@ const App = () => {
                     <Route element={<ProtectedRoute />}>
                         <Route element={<Layout />}>
                             <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/profile" element={<Profile />} />
                             <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
                             {/* Prediction Routes */}
