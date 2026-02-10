@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
 
     // Login function - Mock implementation for now
-    const login = (username) => {
+    const login = (username, password) => {
         // In real app, this would verify with backend
         const fakeUser = { id: 1, username, role: 'patient' };
         setUser(fakeUser);

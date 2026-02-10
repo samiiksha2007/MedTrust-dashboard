@@ -5,13 +5,14 @@ import { Stethoscope, ArrowRight, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
     const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (username.trim()) {
-            login(username);
+        if (username.trim() && password.trim()) {
+            login(username, password);
             navigate('/dashboard');
         }
     };
@@ -39,7 +40,7 @@ const Login = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                            Patient ID / Name
+                            Patient ID / Username
                         </label>
                         <input
                             type="text"
@@ -47,7 +48,22 @@ const Login = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            placeholder="Enter your name to continue..."
+                            placeholder="Enter your username"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                            placeholder="Enter your password"
                             required
                         />
                     </div>
