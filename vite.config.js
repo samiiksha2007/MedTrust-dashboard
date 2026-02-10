@@ -20,6 +20,6 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  
-  base: '/medtrust-dashboard/',
+
+  base: '/MedTrust-dashboard/',
 })
