@@ -5,4 +5,4 @@
 // - Network (Same WiFi): "http://192.168.1.5:8000"
 // - Remote: "https://my-api.render.com"
 
-export const API_BASE_URL = "";
+export const API_BASE_URL = "http://localhost:8000";
