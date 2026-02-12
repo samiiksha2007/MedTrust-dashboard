@@ -50,7 +50,17 @@ const PredictionForm = ({ title, fields, onSubmit, endpoint }) => {
             // Generate mock hash
             const mockHash = "0x" + Math.random().toString(16).substr(2, 40);
 
-
+            // Detect user country via IP geolocation
+            let userCountry = 'Unknown';
+            try {
+                const geoRes = await fetch('https://ipapi.co/json/');
+                if (geoRes.ok) {
+                    const geoData = await geoRes.json();
+                    userCountry = geoData.country_name || 'Unknown';
+                }
+            } catch (geoErr) {
+                console.warn('Could not detect country:', geoErr);
+            }
 
             // Sanitize input data ONLY (exclude timestamp which is a special object)
             const safeInputData = JSON.parse(JSON.stringify(formData));
@@ -62,6 +72,7 @@ const PredictionForm = ({ title, fields, onSubmit, endpoint }) => {
                 accuracy: accuracyDisplay,
                 inputData: safeInputData,
                 blockchainHash: mockHash,
+                country: userCountry,
                 timestamp: serverTimestamp() // Add timestamp AFTER sanitization
             };
 

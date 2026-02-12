@@ -67,6 +67,17 @@ const BrainTumor = () => {
 
             const mockHash = "0x" + Math.random().toString(16).substr(2, 40);
 
+            // Detect user country via IP geolocation
+            let userCountry = 'Unknown';
+            try {
+                const geoRes = await fetch('https://ipapi.co/json/');
+                if (geoRes.ok) {
+                    const geoData = await geoRes.json();
+                    userCountry = geoData.country_name || 'Unknown';
+                }
+            } catch (geoErr) {
+                console.warn('Could not detect country:', geoErr);
+            }
 
             try {
                 // Sanitize input only
@@ -79,6 +90,7 @@ const BrainTumor = () => {
                     accuracy: accuracyDisplay,
                     inputData: safeInputData,
                     blockchainHash: mockHash,
+                    country: userCountry,
                     timestamp: serverTimestamp() // Add AFTER sanitization
                 };
 

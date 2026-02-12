@@ -1,7 +1,9 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Heart, Activity, Brain, User, LogOut, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Heart, Activity, Brain, User, LogOut, ArrowLeft, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+
+const ADMIN_EMAIL = 'medtrust2026@gmail.com';
 
 const SidebarLink = ({ to, icon: Icon, label }) => {
     const location = useLocation();
@@ -56,6 +58,17 @@ const Layout = () => {
                         <ArrowLeft className="w-5 h-5" />
                         <span>Back to Blog</span>
                     </a>
+
+                    {/* Admin Panel Link — only visible to admin */}
+                    {user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
+                        <Link
+                            to="/admin"
+                            className="flex items-center gap-3 px-4 py-3 mb-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors font-medium"
+                        >
+                            <Shield className="w-5 h-5" />
+                            <span>Admin Panel</span>
+                        </Link>
+                    )}
                     <Link
                         to="/profile"
                         className="flex items-center gap-3 px-4 py-3 mb-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer group"
