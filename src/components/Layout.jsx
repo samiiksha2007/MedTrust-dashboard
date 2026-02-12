@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Heart, Activity, Brain, User, LogOut, ArrowLeft, Shield } from 'lucide-react';
+import { LayoutDashboard, Heart, Activity, Brain, User, LogOut, ArrowLeft, Shield, Zap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const ADMIN_EMAIL = 'medtrust2026@gmail.com';
@@ -29,7 +29,12 @@ const Layout = () => {
             <aside className="w-64 bg-white border-r border-gray-200 fixed h-full hidden md:flex flex-col">
                 <div className="p-6 border-b border-gray-100">
                     <h1 className="text-2xl font-bold text-blue-600 flex items-center gap-2">
-                        <Activity className="w-8 h-8" /> MedTrust
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+                            <path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"></path>
+                            <path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"></path>
+                            <circle cx="20" cy="10" r="2"></circle>
+                        </svg>
+                        MedTrust
                     </h1>
                 </div>
 
@@ -37,7 +42,7 @@ const Layout = () => {
                     <SidebarLink to="/dashboard" icon={LayoutDashboard} label="Dashboard" />
                     <SidebarLink to="/start/general" icon={Activity} label="General Health" />
                     <SidebarLink to="/start/heart" icon={Heart} label="Heart Disease" />
-                    <SidebarLink to="/start/diabetes" icon={Activity} label="Diabetes" />
+                    <SidebarLink to="/start/diabetes" icon={Zap} label="Diabetes" />
                     <SidebarLink to="/start/brain" icon={Brain} label="Brain Tumor" />
                 </nav>
 
